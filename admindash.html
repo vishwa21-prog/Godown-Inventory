@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <style>
+      body {
+        background: url("https://i.pinimg.com/736x/68/22/f9/6822f9d596f428f9fe7e583bf92be2b8.jpg")
+          no-repeat center center fixed;
+        background-size: cover;
+        height: 100vh;
+      }
+      h1 {
+        color: #006400;
+      }
+      input {
+        border: 2px solid #4caf50;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      input:focus {
+        border-color: #2e8b57;
+        outline: none;
+      }
+      .form-container {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .container {
+        border-radius: 8px;
+        padding: 16px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-100">
+    <div id="app" class="container mx-auto p-4"></div>
+
+    <script>
+      // Initialize Firebase with your own config
+      const firebaseConfig = {
+        apiKey: "AIzaSyCK5MHRTY5GKg9GqFLd1ILVxlFecXHhq_I",
+        authDomain: "godown-inventory.firebaseapp.com",
+        projectId: "godown-inventory",
+        storageBucket: "godown-inventory.appspot.com",
+        messagingSenderId: "156194495476",
+        appId: "1:156194495476:web:43031892d8173ee614b7a1",
+        measurementId: "G-9YPJRL4LWP",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const app = document.getElementById("app");
+
+      function showAdminDashboard() {
+        app.innerHTML = `
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h1 class="text-3xl font-bold mb-6 text-center text-purple-600">Admin Dashboard</h1>
+                    <div class="mb-4">
+                        <h2 class="text-xl font-semibold">Manage Crops & Transactions</h2>
+                        <div id="productsList" class="mt-4">
+                            <!-- The products will be listed here dynamically -->
+                            <table id="productsTable" class="min-w-full table-auto border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border px-4 py-2 text-left">Category</th>
+                                        <th class="border px-4 py-2 text-left">Subcategory</th>
+                                        <th class="border px-4 py-2 text-left">Quantity (kg)</th>
+                                        <th class="border px-4 py-2 text-left">Price (₹/kg)</th>
+                                        <th class="border px-4 py-2 text-left">Update Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Products will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                        Logout
+                    </button>
+                </div>
+            `;
+        fetchProducts(); // Fetch the list of products when the dashboard is shown
+      }
+
+      // Fetch available products from Firestore (from totalProducts collection)
+      function fetchProducts() {
+        const productsTableBody = document.getElementById("productsTableBody");
+        productsTableBody.innerHTML = ""; // Clear any existing content
+
+        console.log("Fetching products..."); // Debugging line to show that the function is being called
+
+        // Fetch all products from Firestore collection 'totalProducts'
+        db.collection("totalProducts")
+          .get()
+          .then((snapshot) => {
+            const products = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            })); // Include the Firestore document ID
+            console.log("Fetched products:", products); // Debugging line to check what is returned
+
+            if (products.length > 0) {
+              products.forEach((product) => {
+                const productRow = document.createElement("tr");
+                productRow.className = "border-b";
+
+                productRow.innerHTML = `
+                    <td class="border px-4 py-2">${product.category}</td>
+                    <td class="border px-4 py-2">${product.subcategory}</td>
+                    <td class="border px-4 py-2">${product.quantity} kg</td>
+                    <td class="border px-4 py-2">₹${product.pricePerKg}</td>
+                    <td class="border px-4 py-2">
+                        <input type="number" id="newPrice-${product.id}" placeholder="New Price" class="py-1 px-3 border rounded" />
+                        <button onclick="updateProductPrice('${product.id}')" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-4 rounded">
+                            Update Price
+                        </button>
+                    </td>
+                `;
+                productsTableBody.appendChild(productRow);
+              });
+            } else {
+              productsTableBody.innerHTML =
+                '<tr><td colspan="5" class="border px-4 py-2 text-center">No products found.</td></tr>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching products:", error); // Enhanced logging to identify the error
+            productsTableBody.innerHTML =
+              '<tr><td colspan="5" class="border px-4 py-2 text-center">Error loading products. Please try again.</td></tr>';
+          });
+      }
+
+      // Function to update the price of a product
+      function updateProductPrice(productId) {
+        const newPriceInput = document.getElementById(`newPrice-${productId}`);
+        const newPrice = parseFloat(newPriceInput.value);
+
+        console.log(`Updating price for product ${productId} to ₹${newPrice}`); // Debugging log
+
+        if (isNaN(newPrice) || newPrice <= 0) {
+          alert("Please enter a valid price.");
+          return;
+        }
+
+        // Update the price of the product in Firestore
+        db.collection("totalProducts")
+          .doc(productId)
+          .update({
+            pricePerKg: newPrice,
+          })
+          .then(() => {
+            alert("Price updated successfully!");
+            fetchProducts(); // Refresh the list of products
+          })
+          .catch((error) => {
+            console.error("Error updating price: ", error);
+            alert("Failed to update price. Please try again.");
+          });
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("username");
+        window.location.href = "mainlanding.html";
+      }
+
+      showAdminDashboard(); // Initialize the dashboard
+    </script>
+  </body>
+</html>

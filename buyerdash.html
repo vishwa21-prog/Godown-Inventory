@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buyer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <style>
+      body {
+        background: url("https://i.pinimg.com/736x/68/22/f9/6822f9d596f428f9fe7e583bf92be2b8.jpg")
+          no-repeat center center fixed;
+        background-size: cover;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-100">
+    <div id="app" class="container mx-auto p-4"></div>
+
+    <script>
+      // Initialize Firebase with your own config
+      const firebaseConfig = {
+        apiKey: "AIzaSyCK5MHRTY5GKg9GqFLd1ILVxlFecXHhq_I",
+        authDomain: "godown-inventory.firebaseapp.com",
+        projectId: "godown-inventory",
+        storageBucket: "godown-inventory.appspot.com",
+        messagingSenderId: "156194495476",
+        appId: "1:156194495476:web:43031892d8173ee614b7a1",
+        measurementId: "G-9YPJRL4LWP",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const app = document.getElementById("app");
+
+      function showBuyerDashboard() {
+        app.innerHTML = `
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h1 class="text-3xl font-bold mb-6 text-center text-green-600">Buyer Dashboard</h1>
+                    
+                    <!-- Search Bar -->
+                    <div class="mb-6">
+                        <input 
+                            type="text" 
+                            id="searchBar" 
+                            placeholder="Search by category or subcategory..." 
+                            class="w-full p-3 rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-200 focus:ring-opacity-50"
+                            onkeyup="searchProducts()"
+                        />
+                    </div>
+
+                    <!-- Product Container -->
+                    <div id="productContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Product cards will be inserted here -->
+                    </div>
+
+                    <button onclick="logout()" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Logout
+                    </button>
+                </div>
+            `;
+        displayProducts(); // Display products as cards
+      }
+
+      // Function to fetch products from Firestore and display them as cards
+      function displayProducts() {
+        const productContainer = document.getElementById("productContainer");
+        productContainer.innerHTML = ""; // Clear previous products
+
+        db.collection("totalProducts")
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              const product = doc.data();
+              const productId = doc.id;
+
+              // Set a fallback image if no image is provided
+              const productImage =
+                product.imageUrl ||
+                "https://via.placeholder.com/150?text=No+Image+Available";
+
+              // Generate HTML for each product card with enhanced design
+              const productCard = `
+                            <div class="bg-white p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 product-card" data-category="${product.category.toLowerCase()}" data-subcategory="${product.subcategory.toLowerCase()}">
+                                 
+                                <h2 class="text-2xl font-semibold text-gray-800 mb-2">${
+                                  product.category
+                                } - ${product.subcategory}</h2>
+                                <p class="text-gray-600 mb-4">
+                                    ${
+                                      product.quantity <= 0
+                                        ? `<span class="text-red-600 font-semibold">Out of Stock</span>`
+                                        : `Available: ${product.quantity} kg at ₹${product.pricePerKg}/kg`
+                                    }
+                                </p>
+
+                                <!-- Purchase Button: Show only if in stock -->
+                                ${
+                                  product.quantity > 0
+                                    ? ` 
+                                <div class="flex justify-between items-center">
+                                    <button onclick="purchaseProduct('${productId}', ${product.pricePerKg})" 
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-full transition duration-300">
+                                        Purchase
+                                    </button>
+                                    <span class="text-sm text-gray-500">In Stock</span>
+                                </div>`
+                                    : ""
+                                }
+                            </div>
+                        `;
+              productContainer.innerHTML += productCard;
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching products:", error);
+            alert("Error fetching products. Please try again.");
+          });
+      }
+
+      // Function to search for products by category or subcategory
+      function searchProducts() {
+        const searchValue = document
+          .getElementById("searchBar")
+          .value.toLowerCase();
+        const productCards = document.querySelectorAll(".product-card");
+
+        productCards.forEach((card) => {
+          const category = card.getAttribute("data-category");
+          const subcategory = card.getAttribute("data-subcategory");
+
+          if (
+            category.includes(searchValue) ||
+            subcategory.includes(searchValue)
+          ) {
+            card.style.display = ""; // Show card
+          } else {
+            card.style.display = "none"; // Hide card
+          }
+        });
+      }
+
+      // Function to handle product purchase
+      function purchaseProduct(productId, price) {
+        const quantity = prompt("Enter quantity to purchase:");
+        const parsedQuantity = parseInt(quantity);
+
+        if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+          alert("Please enter a valid quantity.");
+          return;
+        }
+
+        db.collection("totalProducts")
+          .doc(productId)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const product = doc.data();
+
+              // Ensure requested quantity is available
+              if (product.quantity >= parsedQuantity) {
+                db.collection("totalProducts")
+                  .doc(productId)
+                  .update({
+                    quantity: product.quantity - parsedQuantity,
+                  });
+
+                db.collection("transactions").add({
+                  type: "purchase",
+                  productId: productId,
+                  buyerId: localStorage.getItem("phoneNumber"),
+                  quantity: parsedQuantity,
+                  price: price,
+                  totalAmount: parsedQuantity * price,
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+
+                alert("Purchase successful!");
+                displayProducts(); // Refresh product list
+              } else {
+                alert("Requested quantity not available.");
+              }
+            } else {
+              alert("Product not found.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error processing purchase:", error);
+            alert("Failed to complete purchase. Please try again.");
+          });
+      }
+
+      function logout() {
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("phoneNumber");
+        window.location.href = "mainlanding.html";
+      }
+
+      showBuyerDashboard(); // Initialize the dashboard
+    </script>
+  </body>
+</html>

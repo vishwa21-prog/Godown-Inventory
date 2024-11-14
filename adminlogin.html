@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <!-- Correct way to include TailwindCSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        body {
+            background: url('https://i.pinimg.com/736x/68/22/f9/6822f9d596f428f9fe7e583bf92be2b8.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+        }
+        /* Custom styles for button */
+        button {
+           
+            color: black;
+        }
+        h1 {
+            color: #006400;
+        }
+        input {
+            border: 2px solid #4CAF50;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        input:focus {
+            border-color: #2E8B57;
+            outline: none;
+        }
+        .form-container {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+    <div id="app" class="container mx-auto p-4"></div>
+
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {  
+            apiKey: "AIzaSyCK5MHRTY5GKg9GqFLd1ILVxlFecXHhq_I",
+            authDomain: "godown-inventory.firebaseapp.com",
+            projectId: "godown-inventory",
+            storageBucket: "godown-inventory.firebasestorage.app",
+            messagingSenderId: "156194495476",
+            appId: "1:156194495476:web:43031892d8173ee614b7a1",
+            measurementId: "G-9YPJRL4LWP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const app = document.getElementById('app');
+
+        function showLoginForm() {
+            app.innerHTML = `
+                <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-green-600">Admin Login</h2>
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="username" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 py-2 px-3">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 py-2 px-3">
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                            Login
+                        </button>
+                    </form>
+                    <button onclick="window.location.href='mainlanding.html'" class="mt-4 text-green-500 hover:text-blue-600">Back to role selection</button>
+                </div>
+            `;
+
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                login(username, password);
+            });
+        }
+
+        function login(username, password) {
+            if (username === 'admin' && password === 'admin123') {
+                localStorage.setItem('userRole', 'admin');
+                window.location.href = 'admindash.html';
+            } else {
+                alert("Invalid credentials!");
+            }
+        }
+
+        showLoginForm();
+    </script>
+</body>
+</html>

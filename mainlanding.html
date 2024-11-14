@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godown Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <style>
+        body {
+            background: url('https://i.pinimg.com/736x/68/22/f9/6822f9d596f428f9fe7e583bf92be2b8.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .container {
+        background-color: rgba(255, 255, 255, 0.855); /* white with 80% opacity */
+    }
+
+    /* Buttons: light green background with black font */
+    button {
+        background-color: #243024; /* light green */
+        color: black; /* black text */
+        border-color: rgba(0, 0, 0, 0.292);
+        border-width: 1px;
+    }
+
+    button:hover {
+        background-color: #537b5386; /* slightly darker green on hover */
+        
+    }
+
+    /* Heading texts: dark green */
+    h1, h2 {
+        color: #006f06; /* dark green */
+    }
+    </style>
+    
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div id="app" class="container mx-auto max-w-lg p-6 rounded-lg shadow-xl backdrop-blur-sm ">
+    </div>
+
+    <script>
+        // Initialize Firebase (replace with your own config)
+        const firebaseConfig = {  
+            apiKey: "AIzaSyCK5MHRTY5GKg9GqFLd1ILVxlFecXHhq_I",
+            authDomain: "godown-inventory.firebaseapp.com",
+            projectId: "godown-inventory",
+            storageBucket: "godown-inventory.firebasestorage.app",
+            messagingSenderId: "156194495476",
+            appId: "1:156194495476:web:43031892d8173ee614b7a1",
+            measurementId: "G-9YPJRL4LWP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const app = document.getElementById('app');
+
+        function showMainLandingPage() {
+            app.innerHTML = `
+                <div class="text-center space-y-8">
+                    <h1 class="text-4xl font-bold tracking-widest mb-10">GODOWN INVENTORY</h1>
+                    
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <h2 class="text-lg font-semibold ">Farmers</h2>
+                            <button onclick="window.location.href='farmerlogin.html'" class="w-full  hover text-black font-medium py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                Login
+                            </button>
+                            <button onclick="window.location.href='farmersignup.html'" class="w-full  hover text-black font-medium py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                Sign Up
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h2 class="text-lg font-semibold ">Buyers</h2>
+                            <button onclick="window.location.href='buyerlogin.html'" class="w-full  hover text-black font-medium py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                Login
+                            </button>
+                            <button onclick="window.location.href='buyersignup.html'" class="w-full  hover text-black font-medium py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                Sign Up
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h2 class="text-lg font-semibold ">Administrators</h2>
+                            <button onclick="window.location.href='adminlogin.html'" class="w-full  hover text-black font-medium py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                                Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        showMainLandingPage();
+    </script>
+</body>
+</html>

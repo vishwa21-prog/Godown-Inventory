@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            background: url('https://i.pinimg.com/736x/68/22/f9/6822f9d596f428f9fe7e583bf92be2b8.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height:100vh;   
+        }
+        /* Container: white with transparency */
+       
+
+        /* Buttons: light green background with black font */
+        button {
+            background-color: #90EE90; /* light green */
+            color: black; /* black text */
+        }
+
+       
+
+        /* Heading texts: dark green */
+        h1, button {
+            color: #006400; /* dark green */
+        }
+
+        /* Form input styling */
+        input {
+           
+            border: 2px solid #4CAF50; /* green border */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        input:focus {
+            border-color: #2E8B57; /* darker green on focus */
+            outline: none;
+        }
+
+        /* Form container shadow */
+        .form-container {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+    <div id="app" class="container mx-auto p-4"></div>
+
+    <script>
+        // Initialize Firebase (replace with your own config)
+        const firebaseConfig = {  
+            apiKey: "AIzaSyCK5MHRTY5GKg9GqFLd1ILVxlFecXHhq_I",
+            authDomain: "godown-inventory.firebaseapp.com",
+            projectId: "godown-inventory",
+            storageBucket: "godown-inventory.firebasestorage.app",
+            messagingSenderId: "156194495476",
+            appId: "1:156194495476:web:43031892d8173ee614b7a1",
+            measurementId: "G-9YPJRL4LWP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(); // Firestore for buyer data
+
+        const app = document.getElementById('app');
+
+        // Function to show the login form
+        function showLoginForm() {
+            app.innerHTML = `
+                <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-green-600">Buyer Login</h2>
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input type="tel" id="phoneNumber" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3">
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                            Login
+                        </button>
+                    </form>
+                    <button onclick="window.location.href='mainlanding.html'" class="mt-4 text-green-500 hover:text-blue-600">Back to role selection</button>
+                </div>
+            `;
+
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const phoneNumber = document.getElementById('phoneNumber').value;
+
+                // Check if buyer is signed up by verifying phone number in Firestore
+                checkBuyerExistence(phoneNumber);
+            });
+        }
+
+        // Function to check if the buyer exists in Firestore
+        function checkBuyerExistence(phoneNumber) {
+            const buyerRef = db.collection('buyers'); // Access the 'buyers' collection
+
+            // Query the 'buyers' collection to check if phone number exists
+            buyerRef.where('phoneNumber', '==', phoneNumber).get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        // If buyer does not exist, show an error
+                        alert('This phone number is not registered. Please sign up first.');
+                    } else {
+                        // If buyer exists, login and redirect to buyer dashboard
+                        localStorage.setItem('userRole', 'buyer');
+                        localStorage.setItem('phoneNumber', phoneNumber);
+                        window.location.href = 'buyerdash.html'; // Redirect to buyer dashboard
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error checking buyer existence: ", error);
+                });
+        }
+
+        showLoginForm();
+    </script>
+</body>
+</html>
