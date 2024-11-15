@@ -108,18 +108,24 @@
                 const productRow = document.createElement("tr");
                 productRow.className = "border-b";
 
+                // Use fallback for quantity to avoid 'undefined' display
+                const quantity =
+                  product.quantity !== undefined
+                    ? `${product.quantity} kg`
+                    : "0 kg";
+
                 productRow.innerHTML = `
-                    <td class="border px-4 py-2">${product.category}</td>
-                    <td class="border px-4 py-2">${product.subcategory}</td>
-                    <td class="border px-4 py-2">${product.quantity} kg</td>
-                    <td class="border px-4 py-2">₹${product.pricePerKg}</td>
-                    <td class="border px-4 py-2">
-                        <input type="number" id="newPrice-${product.id}" placeholder="New Price" class="py-1 px-3 border rounded" />
-                        <button onclick="updateProductPrice('${product.id}')" class="ml-2 mt-2 bg-blue-500 hover:bg-green-600 text-white font-bold py-1 px-4 rounded">
-                         Update Price
-                         </button>
-                    </td>
-                `;
+              <td class="border px-4 py-2">${product.category}</td>
+              <td class="border px-4 py-2">${product.subcategory}</td>
+              <td class="border px-4 py-2">${quantity}</td>
+              <td class="border px-4 py-2">₹${product.pricePerKg}</td>
+              <td class="border px-4 py-2">
+                  <input type="number" id="newPrice-${product.id}" placeholder="New Price" class="py-1 px-3 border rounded" />
+                  <button onclick="updateProductPrice('${product.id}')" class="ml-2 mt-2 bg-blue-500 hover:bg-green-600 text-white font-bold py-1 px-4 rounded">
+                   Update Price
+                   </button>
+              </td>
+          `;
                 productsTableBody.appendChild(productRow);
               });
             } else {
